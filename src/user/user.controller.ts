@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  ValidationPipe,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUserDto';
 import { UpdateBanDto } from './dto/updateBanDto';
@@ -18,7 +19,7 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Post()
-  async createUser(@Body() userDto: CreateUserDto) {
+  async createUser(@Body(new ValidationPipe()) userDto: CreateUserDto) {
     return await this.userService.createUser(userDto);
   }
 
@@ -33,12 +34,12 @@ export class UserController {
   }
 
   @Put('/role')
-  async changeRole(@Body('id') roleDto: UpdateRoleDto) {
+  async changeRole(@Body(new ValidationPipe()) roleDto: UpdateRoleDto) {
     return await this.userService.updateRole(roleDto);
   }
 
-  @Put('/ban/:id')
-  async setBan(@Body('id') banDto: UpdateBanDto) {
+  @Put('/ban')
+  async setBan(@Body(new ValidationPipe()) banDto: UpdateBanDto) {
     return await this.userService.updateBan(banDto);
   }
 

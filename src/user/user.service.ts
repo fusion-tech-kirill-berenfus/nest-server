@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/createUserDto';
@@ -17,7 +17,13 @@ export class UserService {
   }
 
   async getUser(id: number) {
-    return await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new HttpException('Not found', HttpStatus.BAD_REQUEST);
+    }
+
+    return user;
   }
 
   async getAll() {
@@ -26,15 +32,33 @@ export class UserService {
 
   async updateRole(roleDto: UpdateRoleDto) {
     const { id, role } = roleDto;
-    return await this.userRepository.save({ id, role });
+    const { affected } = await this.userRepository.update(id, { role });
+
+    if (!affected) {
+      throw new HttpException("Can't find the user", HttpStatus.NOT_FOUND);
+    }
+
+    return { affected };
   }
 
   async updateBan(banDto: UpdateBanDto) {
     const { id, ban } = banDto;
-    return await this.userRepository.save({ id, ban });
+    const { affected } = await this.userRepository.update(id, { ban });
+
+    if (!affected) {
+      throw new HttpException("Can't find the user", HttpStatus.NOT_FOUND);
+    }
+
+    return { affected };
   }
 
   async deleteUser(id: number) {
-    return await this.userRepository.delete({ id });
+    const { affected } = await this.userRepository.delete({ id });
+
+    if (!affected) {
+      throw new HttpException("Can't find the user", HttpStatus.NOT_FOUND);
+    }
+
+    return { affected };
   }
 }
