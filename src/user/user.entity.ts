@@ -10,10 +10,10 @@ export class User {
   email: string;
 
   @Column()
-  firstname: string;
+  username: string;
 
   @Column()
-  lastname: string;
+  password: string;
 
   @Column({ enum: UserRole, default: UserRole.USER })
   role: UserRole;

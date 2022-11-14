@@ -12,18 +12,17 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async createUser(userDto: CreateUserDto) {
-    return await this.userRepository.save(userDto);
+  async createUser(createUserDto: CreateUserDto) {
+    const user = this.userRepository.create({ ...createUserDto });
+    await this.userRepository.insert(user);
   }
 
-  async getUser(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
+  async getUserById(id: number) {
+    return await this.userRepository.findOneBy({ id });
+  }
 
-    if (!user) {
-      throw new HttpException('Not found', HttpStatus.BAD_REQUEST);
-    }
-
-    return user;
+  async getUserByEmail(email: string) {
+    return await this.userRepository.findOneBy({ email });
   }
 
   async getAll() {

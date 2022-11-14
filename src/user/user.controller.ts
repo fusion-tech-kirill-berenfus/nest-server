@@ -3,29 +3,30 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   ParseIntPipe,
-  Post,
   Put,
   ValidationPipe,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/createUserDto';
+import { UserService } from './user.service';
 import { UpdateBanDto } from './dto/updateBanDto';
 import { UpdateRoleDto } from './dto/updateRoleDto';
-import { UserService } from './user.service';
 
 @Controller('api/user')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Post()
-  async createUser(@Body(new ValidationPipe()) userDto: CreateUserDto) {
-    return await this.userService.createUser(userDto);
-  }
-
   @Get(':id')
   async getUser(@Param('id', ParseIntPipe) id: number) {
-    return await this.userService.getUser(id);
+    const user = await this.userService.getUserById(id);
+
+    if (!user) {
+      throw new HttpException('Not found', HttpStatus.BAD_REQUEST);
+    }
+
+    return user;
   }
 
   @Get()
@@ -34,13 +35,13 @@ export class UserController {
   }
 
   @Put('/role')
-  async changeRole(@Body(new ValidationPipe()) roleDto: UpdateRoleDto) {
-    return await this.userService.updateRole(roleDto);
+  async changeRole(@Body(new ValidationPipe()) updateRoleDto: UpdateRoleDto) {
+    return await this.userService.updateRole(updateRoleDto);
   }
 
   @Put('/ban')
-  async setBan(@Body(new ValidationPipe()) banDto: UpdateBanDto) {
-    return await this.userService.updateBan(banDto);
+  async setBan(@Body(new ValidationPipe()) updateBanDto: UpdateBanDto) {
+    return await this.userService.updateBan(updateBanDto);
   }
 
   @Delete(':id')
