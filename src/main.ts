@@ -1,14 +1,15 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function start() {
   const app = await NestFactory.create(AppModule);
 
-  const configService = app.get(ConfigService);
+  app.use(cookieParser());
 
-  const PORT = +configService.get('PORT');
-  console.log('Using port', PORT);
+  const PORT = app.get(ConfigService).get('PORT');
+  console.log('Using port', +PORT);
 
   await app.listen(PORT);
 }
