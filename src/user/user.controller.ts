@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -8,16 +9,23 @@ import {
   Param,
   ParseIntPipe,
   Put,
+  UseGuards,
+  UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateBanDto } from './dto/updateBanDto';
 import { UpdateRoleDto } from './dto/updateRoleDto';
-
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { Roles } from 'src/decorators/roles.decorator';
+import { UserRole } from 'src/enums/rolesEnum';
+import { RolesGuard } from 'src/guards/roles.guard';
+@UseGuards(JwtAuthGuard)
 @Controller('api/user')
 export class UserController {
   constructor(private userService: UserService) {}
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
   async getUser(@Param('id', ParseIntPipe) id: number) {
     const user = await this.userService.getUserById(id);
@@ -29,6 +37,9 @@ export class UserController {
     return user;
   }
 
+  @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
   async getAllUsers() {
     return await this.userService.getAll();

@@ -22,7 +22,7 @@ export class AuthController {
 
   @Post('/register')
   async createUser(@Body(new ValidationPipe()) createUserDto: CreateUserDto) {
-    return await this.authService.registerUser(createUserDto);
+    await this.authService.registerUser(createUserDto);
   }
 
   @Post()
@@ -40,7 +40,6 @@ export class AuthController {
     res.status(HttpStatus.OK).json({ access_token });
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('/refresh')
   async refresh(@Req() req: Request, @Res() res: Response) {
     const { refresh_token: refreshToken } = req.cookies as CookieType;

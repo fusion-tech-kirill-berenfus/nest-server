@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { TokenBodyType } from './types/tokenBodyType';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -13,8 +14,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    //creates user property in Req
-    return { userId: payload.sub };
+  //Adds 'user' field to Req, it's used in RoleGuard
+  async validate(payload: TokenBodyType) {
+    return { userId: payload.sub, role: payload.role };
   }
 }

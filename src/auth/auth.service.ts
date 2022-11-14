@@ -5,7 +5,8 @@ import { CreateUserDto } from '../user/dto/createUserDto';
 import { LoginUserDto } from './dto/loginUserDto';
 import { Response } from 'express';
 import { UserService } from 'src/user/user.service';
-import { TokenBodyType } from './types/tokenBodyType';
+import { TokenBodyType, TokenUserInfo } from './types/tokenBodyType';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,39 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) {}
+
+  async login(loginUserDto: LoginUserDto) {
+    const user = await this.userService.getUserByEmail(loginUserDto.email);
+
+    if (!user) {
+      throw new HttpException('Incorrect email', HttpStatus.BAD_REQUEST);
+    }
+
+    const isPasswordsAreEqual = await compare(
+      loginUserDto.password,
+      user.password,
+    );
+
+    if (!isPasswordsAreEqual) {
+      throw new HttpException('Incorrect password', HttpStatus.BAD_REQUEST);
+    }
+
+    const tokensPair = await this.getTokens(user);
+
+    return tokensPair;
+  }
+
+  async logout(res: Response) {
+    res.clearCookie('refreshToken');
+  }
+
+  async refresh(refresh_token: string) {
+    const payload = (await this.jwtService.verifyAsync(
+      refresh_token,
+    )) as TokenBodyType;
+
+    return await this.getTokens(payload);
+  }
 
   async registerUser(createUserDto: CreateUserDto) {
     const existedUser = await this.userService.getUserByEmail(
@@ -34,47 +68,26 @@ export class AuthService {
     });
   }
 
-  async login(loginUserDto: LoginUserDto) {
-    const user = await this.userService.getUserByEmail(loginUserDto.email);
+  private getTokens(payload: TokenBodyType | User) {
+    const userInfo = this.parseTokenBody(payload);
 
-    if (!user) {
-      throw new HttpException('Incorrect email', HttpStatus.BAD_REQUEST);
-    }
-
-    const isPasswordsAreEqual = await compare(
-      loginUserDto.password,
-      user.password,
-    );
-
-    if (!isPasswordsAreEqual) {
-      throw new HttpException('Incorrect password', HttpStatus.BAD_REQUEST);
-    }
-
-    const tokensPair = await this.getTokens(user.id);
-
-    return tokensPair;
-  }
-
-  async refresh(refresh_token: string) {
-    const { sub } = (await this.jwtService.verifyAsync(
-      refresh_token,
-    )) as TokenBodyType;
-
-    return await this.getTokens(sub);
-  }
-
-  async logout(res: Response) {
-    res.clearCookie('refreshToken');
-  }
-
-  private signTokenAsync(sub: number, expiresIn: string) {
-    return this.jwtService.signAsync({ sub }, { expiresIn });
-  }
-
-  private getTokens(userId: number) {
     return Promise.all([
-      this.signTokenAsync(userId, '10m'),
-      this.signTokenAsync(userId, '30m'),
+      this.signTokenAsync(userInfo, '10m'),
+      this.signTokenAsync(userInfo, '30m'),
     ]);
+  }
+
+  private signTokenAsync(userInfo: TokenUserInfo, expiresIn: string) {
+    return this.jwtService.signAsync(userInfo, { expiresIn });
+  }
+
+  private parseTokenBody(payload: TokenBodyType | User): TokenUserInfo {
+    if (payload instanceof User) {
+      const { id, role } = payload;
+      return { sub: id, role };
+    } else {
+      const { sub, role } = payload;
+      return { sub, role };
+    }
   }
 }
