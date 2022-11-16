@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { TokenUserInfo } from 'src/auth/types/tokenBodyType';
+import { TokenUserInfo } from 'src/auth/types/token-body.type';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

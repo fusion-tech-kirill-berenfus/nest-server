@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/createUserDto';
-import { UpdateBanDto } from './dto/updateBanDto';
-import { UpdateRoleDto } from './dto/updateRoleDto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateBanDto } from './dto/update-ban.dto';
+import { UpdateRoleDto } from './dto/update-role.dto';
 import { User } from './user.entity';
 
 @Injectable()
@@ -47,8 +47,6 @@ export class UserService {
     if (!affected) {
       throw new HttpException("Can't find the user", HttpStatus.NOT_FOUND);
     }
-
-    return { affected };
   }
 
   async deleteUser(id: number) {
@@ -57,7 +55,5 @@ export class UserService {
     if (!affected) {
       throw new HttpException("Can't find the user", HttpStatus.NOT_FOUND);
     }
-
-    return { affected };
   }
 }

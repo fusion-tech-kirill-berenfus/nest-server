@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { hash, compare } from 'bcrypt';
-import { CreateUserDto } from '../user/dto/createUserDto';
-import { LoginUserDto } from './dto/loginUserDto';
 import { Response } from 'express';
-import { UserService } from 'src/user/user.service';
-import { TokenBodyType, TokenUserInfo } from './types/tokenBodyType';
 import { User } from 'src/user/user.entity';
+import { UserService } from 'src/user/user.service';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { LoginUserDto } from './dto/login.dto';
+import { TokenBodyType, TokenUserInfo } from './types/token-body.type';
 
 @Injectable()
 export class AuthService {
@@ -73,7 +73,7 @@ export class AuthService {
 
     return Promise.all([
       this.signTokenAsync(userInfo, '10m'),
-      this.signTokenAsync(userInfo, '30m'),
+      this.signTokenAsync(userInfo, '3d'),
     ]);
   }
 

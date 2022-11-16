@@ -6,25 +6,51 @@ import {
   Post,
   Req,
   Res,
-  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { CookieType } from 'src/auth/types/cookieType';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from '../user/dto/createUserDto';
-import { LoginUserDto } from './dto/loginUserDto';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { LoginUserDto } from './dto/login.dto';
+import { CookieType } from './types/cookie.type';
 
+@ApiTags('Auth')
 @Controller('api/auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiOperation({ summary: 'Create new user in the system' })
+  @ApiCreatedResponse()
+  @ApiBadRequestResponse({ description: 'Validation failed' })
+  @ApiBody({ type: CreateUserDto })
   @Post('/register')
-  async createUser(@Body(new ValidationPipe()) createUserDto: CreateUserDto) {
+  async register(@Body(new ValidationPipe()) createUserDto: CreateUserDto) {
     await this.authService.registerUser(createUserDto);
   }
 
+  @ApiOperation({
+    summary: 'Recive access token in body and refresh token in cookie',
+  })
+  @ApiOkResponse({
+    type: LoginResponseDto,
+    headers: {
+      Set_Cookie: {
+        description: 'refresh_roken. Http only. 2 days',
+        example: 'asfkakjsfgUGWFIUAgf.IAGSfiugfsaf.BAJKSfbkjASfkb',
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: 'Incorrect creeds' })
+  @ApiBody({ type: LoginUserDto })
   @Post()
   async login(
     @Body(new ValidationPipe()) loginUserDto: LoginUserDto,
@@ -40,6 +66,19 @@ export class AuthController {
     res.status(HttpStatus.OK).json({ access_token });
   }
 
+  @ApiOperation({
+    summary:
+      'Recive access token in body and refresh token in cookie after old refresh token validation.',
+  })
+  @ApiOkResponse({
+    type: LoginResponseDto,
+    headers: {
+      Set_Cookie: {
+        description: 'refresh_roken. Http only. 2 days',
+        example: 'asfkakjsfgUGWFIUAgf.IAGSfiugfsaf.BAJKSfbkjASfkb',
+      },
+    },
+  })
   @Post('/refresh')
   async refresh(@Req() req: Request, @Res() res: Response) {
     const { refresh_token: refreshToken } = req.cookies as CookieType;
@@ -61,10 +100,11 @@ export class AuthController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Clear cookie with refresh token' })
+  @ApiOkResponse()
   @Post('/logout')
   async logout(@Res() res: Response) {
     this.authService.logout(res);
-    res.status(200).send();
+    res.status(HttpStatus.OK).send();
   }
 }
