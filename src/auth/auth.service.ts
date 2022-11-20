@@ -2,9 +2,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { hash, compare } from 'bcrypt';
 import { Response } from 'express';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
-import { CreateUserDto } from '../user/dto/create-user.dto';
+import { User } from 'src/modules/user/user.entity';
+import { UserService } from 'src/modules/user/user.service';
+import { CreateUserDto } from '../modules/user/dto/create-user.dto';
 import { LoginUserDto } from './dto/login.dto';
 import { TokenBodyType, TokenUserInfo } from './types/token-body.type';
 

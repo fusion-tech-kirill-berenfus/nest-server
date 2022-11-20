@@ -19,7 +19,7 @@ import {
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginResponseDto } from './dto/login-response.dto';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { CreateUserDto } from 'src/modules/user/dto/create-user.dto';
 import { LoginUserDto } from './dto/login.dto';
 import { CookieType } from './types/cookie.type';
 

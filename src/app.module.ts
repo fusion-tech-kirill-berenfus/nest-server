@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user/user.entity';
-import { UserModule } from './user/user.module';
+import { User } from './modules/user/user.entity';
+import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { PostModule } from './modules/post/post.module';
+import { Post } from './modules/post/post.entity';
+import { Image } from './modules/image/image.entity';
+import { ImageModule } from './modules/image/image.module';
 
 @Module({
   imports: [
@@ -17,11 +21,13 @@ import { AuthModule } from './auth/auth.module';
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [User],
+      entities: [User, Post, Image],
       synchronize: true,
     }),
-    UserModule,
     AuthModule,
+    ImageModule,
+    PostModule,
+    UserModule,
   ],
 })
 export class AppModule {}
