@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { hash, compare } from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 import { User } from 'src/modules/user/user.entity';
 import { UserService } from 'src/modules/user/user.service';
@@ -22,7 +22,7 @@ export class AuthService {
       throw new HttpException('Incorrect email', HttpStatus.BAD_REQUEST);
     }
 
-    const isPasswordsAreEqual = await compare(
+    const isPasswordsAreEqual = await bcrypt.compare(
       loginUserDto.password,
       user.password,
     );
@@ -60,7 +60,7 @@ export class AuthService {
       );
     }
 
-    const hashedPassword = await hash(createUserDto.password, 5);
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 5);
 
     await this.userService.createUser({
       ...createUserDto,
